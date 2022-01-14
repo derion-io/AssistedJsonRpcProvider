@@ -1,24 +1,28 @@
-const { convert, split, explode } = require('../utils');
+const { convert, split, explode, mergeTwoUniqSortedLogs } = require('../utils');
 const throttledQueue = require('throttled-queue');
 const fetch = require('node-fetch');
 const _ = require('lodash');
 const ethers = require('ethers');
 const { JsonRpcProvider } = require('@ethersproject/providers');
-class AssistedJsonRpcProvider extends  JsonRpcProvider{
+class AssistedJsonRpcProvider extends JsonRpcProvider {
     constructor(
         url,
         network,
         etherscanConfig = {
             rangeThreshold: 5000,
-            rateLimit: 5,
-            baseUrl: 'https://api.bscscan.com/api',
-            endpointReturnsMaximum: 1000,
+            rateLimitCount: 5,
+            rateLimitDuration: 1000,
+            baseUrl: 'https://api.etherscan.io/api',
+            endpointReturnsMaximum: 10000,
         }
     ) {
         super(url, network);
         this.defautlProvider = new JsonRpcProvider(url, network);
         this.etherscanConfig = etherscanConfig;
-        this.throttle = throttledQueue(etherscanConfig.rateLimit, 1000);
+        this.throttle = throttledQueue(
+            etherscanConfig.rangeThreshold,
+            etherscanConfig.rateLimitDuration
+        );
     }
     async getLogs(filter) {
         if (filter.toBlock == null) {
@@ -45,23 +49,19 @@ class AssistedJsonRpcProvider extends  JsonRpcProvider{
         } else {
             filterSplit = [explode(filterSplit)];
         }
-        let logss = [];
+        let all = [];
         for (let index = 0; index < filterSplit.length; index++) {
             const f = filterSplit[index];
             const logs = await this.scanLogs(f);
             // console.info(
             //     `Get log from ${f.fromBlock} to ${f.toBlock} have ${logs.length}`
             // );
-            logs.forEach(
-                (log) => (log.address = ethers.utils.getAddress(log.address))
-            );
-            logss.push(logs);
+            all = mergeTwoUniqSortedLogs(all, logs);
         }
-        const logsOrdered = _.orderBy(_.flatten(logss), 'blockNumber');
-        logsOrdered.forEach(
+        all.forEach(
             (log) => (log.address = ethers.utils.getAddress(log.address))
         );
-        return logsOrdered;
+        return all;
     }
     async search(url) {
         try {

@@ -51,9 +51,42 @@ function explode(s) {
     
     return filter
   }
-  
+  function mergeTwoUniqSortedLogs(a, b) {
+    if (!a?.length) {
+        return b ?? []
+    }
+    if (!b?.length) {
+        return a ?? []
+    }
+    const r = []
+    const i = {
+        a: 0,
+        b: 0
+    }
+    while (i.a < a.length || i.b < b.length) {
+        if (a[i.a] == null) {
+            r.push(b[i.b++])
+            continue
+        }
+        if (b[i.b] == null) {
+            r.push(a[i.a++])
+            continue
+        }
+        const c = compareLog(a[i.a], b[i.b])
+        if (c < 0) {
+            r.push(a[i.a++])
+            continue
+        }
+        if (c == 0) {
+            i.a++
+        }
+        r.push(b[i.b++])
+    }
+    return r;
+}
   module.exports = {
     convert,
     split,
-    explode
+    explode,
+    mergeTwoUniqSortedLogs
 }
