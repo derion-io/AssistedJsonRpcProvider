@@ -3,11 +3,11 @@ const throttledQueue = require('throttled-queue');
 const fetch = require('node-fetch');
 const _ = require('lodash');
 const ethers = require('ethers');
-const { JsonRpcProvider } = require('@ethersproject/providers');
-class AssistedJsonRpcProvider extends JsonRpcProvider {
+const { Provider } = require('@ethersproject/providers');
+// const DefaultAPIKey = 'YD1424ACBTAZBRJWEIHAPHFZMT69MZXBBI'
+class AssistedJsonRpcProvider extends Provider {
     constructor(
-        url,
-        network,
+        provider,
         etherscanConfig = {
             rangeThreshold: 5000,
             rateLimitCount: 5,
@@ -16,18 +16,51 @@ class AssistedJsonRpcProvider extends JsonRpcProvider {
             endpointReturnsMaximum: 10000,
         }
     ) {
-        super(url, network);
-        this.defautlProvider = new JsonRpcProvider(url, network);
+        super();
+        this.provider = provider;
         this.etherscanConfig = etherscanConfig;
         this.throttle = throttledQueue(
             etherscanConfig.rangeThreshold,
             etherscanConfig.rateLimitDuration
         );
     }
+    getBalance(...args) {
+        return this.provider.getBalance(args);
+    }
+    getBlock(...args) {
+        return this.provider.getBlock(...args);
+    }
+    getBlockNumber(...args) {
+        return this.provider.getBlockNumber(...args);
+    }
+    getBlockWithTransactions(...args) {
+        return this.provider.getBlockWithTransactions(...args);
+    }
+    getCode(...args) {
+        return this.provider.getCode(...args);
+    }
+    getFeeData(...args) {
+        return this.provider.getFeeData(...args);
+    }
+    getGasPrice(...args) {
+        return this.provider.getGasPrice(...args);
+    }
+    getNetwork(...args) {
+        return this.provider.getNetwork(...args);
+    }
+    getStorageAt(...args) {
+        return this.provider.getStorageAt(...args);
+    }
+    getTransaction(...args) {
+        return this.provider.getTransaction(...args);
+    }
+    getTransactionReceipt(...args) {
+        return this.provider.getTransactionReceipt(...args);
+    }
+    getTransactionCount(...args) {
+        return this.provider.getTransactionCount(...args);
+    }
     async getLogs(filter) {
-        if (filter.toBlock == null) {
-            this.head = await this.defautlProvider.getBlockNumber();
-        }
         if (
             this.etherscanConfig &&
             filter.fromBlock != null &&
@@ -40,7 +73,7 @@ class AssistedJsonRpcProvider extends JsonRpcProvider {
         }
     }
     async getLogsDefault(filter) {
-        return this.defautlProvider.getLogs(filter);
+        return this.provider.getLogs(filter);
     }
     async getLogsByApi(filter) {
         let filterSplit = split(convert(filter));
@@ -66,13 +99,9 @@ class AssistedJsonRpcProvider extends JsonRpcProvider {
     async search(url) {
         try {
             while (true) {
-                const res = await this.throttle(async () => {
-                    const res = await fetch(url, {
-                        method: 'GET',
-                    }).then((res) => res.json());
-                    return Promise.resolve(res);
-                });
-
+                const res = await this.throttle(() =>
+                    fetch(url).then((res) => res.json())
+                );
                 if (Array.isArray(res.result)) {
                     return res.result;
                 }
@@ -115,6 +144,7 @@ class AssistedJsonRpcProvider extends JsonRpcProvider {
                 }
             }
         }
+        // url+=`&apikey=${DefaultAPIKey}`
         return url;
     }
 }
