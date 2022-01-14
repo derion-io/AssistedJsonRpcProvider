@@ -64,7 +64,8 @@ class AssistedJsonRpcProvider extends Provider {
         if (
             this.etherscanConfig &&
             filter.fromBlock != null &&
-            (filter.toBlock ?? this.head) - filter.fromBlock >
+            filter.toBlock != null &&
+            filter.toBlock - filter.fromBlock >
                 this.etherscanConfig.rangeThreshold
         ) {
             return this.getLogsByApi(filter);
