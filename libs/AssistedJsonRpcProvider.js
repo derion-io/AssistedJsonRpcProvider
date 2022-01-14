@@ -1,4 +1,4 @@
-const { convert, split, explode, mergeTwoUniqSortedLogs } = require('../utils');
+const { mergeTwoUniqSortedLogs, translateFilter } = require('../utils');
 const throttledQueue = require('throttled-queue');
 const fetch = require('node-fetch');
 const _ = require('lodash');
@@ -77,15 +77,11 @@ class AssistedJsonRpcProvider extends Provider {
         return this.provider.getLogs(filter);
     }
     async getLogsByApi(filter) {
-        let filterSplit = split(convert(filter));
-        if (Array.isArray(filterSplit)) {
-            filterSplit = filterSplit.map((e) => explode(e));
-        } else {
-            filterSplit = [explode(filterSplit)];
-        }
+        let filters = translateFilter(filter);
+        
         let all = [];
-        for (let index = 0; index < filterSplit.length; index++) {
-            const f = filterSplit[index];
+        for (let index = 0; index < filters.length; index++) {
+            const f = filters[index];
             const logs = await this.scanLogs(f);
             // console.info(
             //     `Get log from ${f.fromBlock} to ${f.toBlock} have ${logs.length}`

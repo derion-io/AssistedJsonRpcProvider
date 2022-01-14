@@ -4,8 +4,10 @@ function convert(filter) {
       return filter.topics[i] ?? t
     }) : []
     let result = {
-      address: filter.address,
       ...topics,
+    }
+    if(filter.address!=null){
+      result['address'] = filter.address
     }
     if (filter.fromBlock != null) {
       result['fromBlock'] = filter.fromBlock
@@ -33,23 +35,26 @@ function split(filter) {
   }
   
 function explode(s) {
-    let topics = { ...s }
-    delete topics['address']
-    delete topics['fromBlock']
-    delete topics['toBlock']
-    topics = Object.values(topics)
-    let filter = {
-      address: s['address'],
-      topics: topics,
+    let topics = { ...s };
+    delete topics['address'];
+    delete topics['fromBlock'];
+    delete topics['toBlock'];
+    topics = Object.values(topics);
+    let filter = {};
+    if (s['address'] != null) {
+        filter['address'] = s['address'];
+    }
+    if (topics.length) {
+        filter['topics'] = topics;
     }
     if (s['fromBlock'] != null) {
-      filter['fromBlock'] = s['fromBlock']
+        filter['fromBlock'] = s['fromBlock'];
     }
     if (s['toBlock'] != null) {
-      filter['toBlock'] = s['toBlock']
+        filter['toBlock'] = s['toBlock'];
     }
-    
-    return filter
+
+    return filter;
   }
   function mergeTwoUniqSortedLogs(a, b) {
     if (!a?.length) {
@@ -84,9 +89,24 @@ function explode(s) {
     }
     return r;
 }
-  module.exports = {
+/**
+ * Generate a valid filter list with scan api. The sum of the logs of the filters is equal to the logs of the filter
+ * @param {*} filter 
+ * @returns
+ */
+const translateFilter = (filter)=>{
+    let filters = split(convert(filter));
+    if (Array.isArray(filters)) {
+      filters = filters.map((e) => explode(e));
+    } else {
+      filters = [explode(filters)];
+    }
+    return filters
+}
+module.exports = {
     convert,
     split,
     explode,
-    mergeTwoUniqSortedLogs
+    mergeTwoUniqSortedLogs,
+    translateFilter
 }
