@@ -49,9 +49,9 @@ class AssistedJsonRpcProvider extends  JsonRpcProvider{
         for (let index = 0; index < filterSplit.length; index++) {
             const f = filterSplit[index];
             const logs = await this.scanLogs(f);
-            console.info(
-                `Get log from ${filterSplit.fromBlock} to ${filterSplit.toBlock} have ${logs.length}`
-            );
+            // console.info(
+            //     `Get log from ${f.fromBlock} to ${f.toBlock} have ${logs.length}`
+            // );
             logs.forEach(
                 (log) => (log.address = ethers.utils.getAddress(log.address))
             );

@@ -1,8 +1,11 @@
 const _ = require('lodash')
 function convert(filter) {
+    const topics =filter.topics ? new Array(filter.topics.length).fill(null).map((t,i)=>{
+      return filter.topics[i] ?? t
+    }) : []
     let result = {
       address: filter.address,
-      ...filter.topics,
+      ...topics,
     }
     if (filter.fromBlock != null) {
       result['fromBlock'] = filter.fromBlock
