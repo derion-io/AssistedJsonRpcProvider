@@ -8,13 +8,17 @@
         "throttled-queue": "^2.1.2",
         "@ethersproject/providers": "https://github.com/ezDeFi/ethers.js/releases/download/v5.3.1.1/ethers_providers.tar.gz"
     },
+    "devDependencies": {
+        "mocha": "^6.2.2"
+    },
     "scripts": {
-        "test": "node test/quick-test.js"
+        "quick-test": "node test/quick-test.js",
+        "test": "mocha --recursive --timeout 20000 'test/**/*.spec.js'"
     },
     "main": "libs/index.js",
     "description": "A library to wrap method getLogs can use scan api or rpc request",
     "directories": {
-      "libs": "libs"
+        "libs": "libs"
     },
     "license": "UNLICENSED"
 }

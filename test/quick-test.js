@@ -1,12 +1,13 @@
 const { AssistedJsonRpcProvider } = require('../libs/index');
 const fetch = require('node-fetch');
+const { JsonRpcProvider } = require('ethers/node_modules/@ethersproject/providers');
 const run = async () => {
     const provider = new AssistedJsonRpcProvider(
-        'https://bsc-dataseed.binance.org',
-        null,
+        new JsonRpcProvider('https://bsc-dataseed.binance.org'),
         {
-            rateLimit: 5,
-            rangeThreshold: 1000,
+            rateLimitCount: 5,
+            rateLimitDuration:1000,
+            rangeThreshold: 5000,
             endpointReturnsMaximum: 1000,
             baseUrl: 'https://api.bscscan.com/api',
         }
@@ -14,7 +15,7 @@ const run = async () => {
     // 0xefebf78ae76268b27bcac3e225bec2539212215d
     const logs = await provider.getLogs({
         fromBlock: 0,
-        // toBlock: 14328200,
+        toBlock: 14328200,
         topics: [
             null,
             '0x000000000000000000000000efebf78ae76268b27bcac3e225bec2539212215d',
