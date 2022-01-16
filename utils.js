@@ -56,6 +56,19 @@ function explode(s) {
 
     return filter;
   }
+  function compareLog(a, b) {
+    if (a.blockNumber < b.blockNumber) {
+        return -2
+    } else if (a.blockNumber > b.blockNumber) {
+        return 2
+    }
+    if (a.logIndex < b.logIndex) {
+        return -1
+    } else if (a.logIndex > b.logIndex) {
+        return 1
+    }
+    return 0
+}
   function mergeTwoUniqSortedLogs(a, b) {
     if (!a?.length) {
         return b ?? []

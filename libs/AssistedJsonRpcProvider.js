@@ -20,7 +20,7 @@ class AssistedJsonRpcProvider extends Provider {
         this.provider = provider;
         this.etherscanConfig = etherscanConfig;
         this.throttle = throttledQueue(
-            etherscanConfig.rangeThreshold,
+            etherscanConfig.rateLimitCount,
             etherscanConfig.rateLimitDuration
         );
     }
