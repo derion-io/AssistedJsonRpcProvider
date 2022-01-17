@@ -32,8 +32,9 @@ class AssistedJsonRpcProvider extends Provider {
             return queue
         })
     }
+    // Queries
     getBalance(...args) {
-        return this.provider.getBalance(args);
+        return this.provider.getBalance(...args);
     }
     getBlock(...args) {
         return this.provider.getBlock(...args);
@@ -68,6 +69,50 @@ class AssistedJsonRpcProvider extends Provider {
     getTransactionCount(...args) {
         return this.provider.getTransactionCount(...args);
     }
+    // Execution
+    sendTransaction(...args) {
+        return this.provider.sendTransaction(...args);
+    }
+    call(...args) {
+        return this.provider.call(...args);
+    }
+    estimateGas() {
+        return this.provider.estimateGas(...args);
+    }
+    // ENS
+    resolveName(...args) {
+        return this.provider.resolveName(...args)
+    };
+    lookupAddress(...args) {
+        return this.provider.lookupAddress(...args)
+    };
+    // Event Emitter (ish)
+    on(...args) {
+        return this.provider.on(...args)
+    };
+    once(...args) {
+        return this.provider.once(...args)
+    }
+    emit(...args) {
+        return this.provider.emit(...args)
+    }
+    listenerCount(...args) {
+        return this.provider.listenerCount(...args)
+    }
+    listeners(...args) {
+        return this.provider.listeners(...args)
+    };
+    off(...args) {
+        return this.provider.off(...args)
+    };
+    removeAllListeners(...args) {
+        return this.provider.removeAllListeners(...args)
+    };
+
+    waitForTransaction(...args) {
+        return this.provider.waitForTransaction(...args)
+    }
+    // Override
     async getLogs(filter) {
         if (
             this.etherscanConfig &&
