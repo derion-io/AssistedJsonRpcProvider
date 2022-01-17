@@ -78,7 +78,7 @@ class AssistedJsonRpcProvider extends Provider {
     }
     async getLogsByApi(filter) {
         let filters = translateFilter(filter);
-        
+
         let all = [];
         for (let index = 0; index < filters.length; index++) {
             const f = filters[index];
@@ -119,7 +119,7 @@ class AssistedJsonRpcProvider extends Provider {
             if (logs.length < this.etherscanConfig.maxResults) {
                 return result.concat(logs);
             }
-            fromBlock = ethers.BigNumber.from(_.maxBy(logs, 'blockNumber').blockNumber).add(1).toNumber();
+            fromBlock = Number(_.maxBy(logs, 'blockNumber').blockNumber) + 1;
             result = result.concat(logs);
         }
     }
