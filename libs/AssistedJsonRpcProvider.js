@@ -10,10 +10,10 @@ class AssistedJsonRpcProvider extends Provider {
         provider,
         etherscanConfig = {
             rangeThreshold: 5000,
-            rateLimitCount: 5,
-            rateLimitDuration: 1000,
-            baseUrl: 'https://api.etherscan.io/api',
-            endpointReturnsMaximum: 10000,
+            rateLimitCount: 1,
+            rateLimitDuration: 5000,
+            url: 'https://api.etherscan.io/api',
+            maxResults: 1000,
         }
     ) {
         super();
@@ -116,19 +116,15 @@ class AssistedJsonRpcProvider extends Provider {
                 fromBlock,
             });
             let logs = await this.search(url);
-            logs = logs.map((log) => ({
-                ...log,
-                blockNumber: parseInt(log.blockNumber, 16),
-            }));
-            if (logs.length < this.etherscanConfig.endpointReturnsMaximum) {
+            if (logs.length < this.etherscanConfig.maxResults) {
                 return result.concat(logs);
             }
-            fromBlock = _.maxBy(logs, 'blockNumber').blockNumber + 1;
+            fromBlock = ethers.BigNumber.from(_.maxBy(logs, 'blockNumber').blockNumber).add(1).toNumber();
             result = result.concat(logs);
         }
     }
     getUrlScanLog(filter) {
-        let url = this.etherscanConfig.baseUrl + '?module=logs&action=getLogs';
+        let url = this.etherscanConfig.url + '?module=logs&action=getLogs';
         for (const key in filter) {
             if (Object.prototype.hasOwnProperty.call(filter, key)) {
                 const value = filter[key];
