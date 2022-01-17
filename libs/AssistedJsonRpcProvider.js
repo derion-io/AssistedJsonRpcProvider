@@ -14,15 +14,25 @@ class AssistedJsonRpcProvider extends Provider {
             rateLimitDuration: 5000,
             url: 'https://api.etherscan.io/api',
             maxResults: 1000,
+            apiKeys: [],
         }
     ) {
         super();
         this.provider = provider;
         this.etherscanConfig = etherscanConfig;
-        this.throttle = throttledQueue(
+        this.throttleDefault = throttledQueue(
             etherscanConfig.rateLimitCount,
             etherscanConfig.rateLimitDuration
         );
+        this.throttles = new Map()
+        if (etherscanConfig.apiKeys && etherscanConfig.apiKeys.length) {
+            etherscanConfig.apiKeys.forEach(apiKey => {
+                this.throttles.set(apiKey, throttledQueue(
+                    5,
+                    1000
+                ))
+            })
+        }
     }
     getBalance(...args) {
         return this.provider.getBalance(args);
@@ -66,7 +76,7 @@ class AssistedJsonRpcProvider extends Provider {
             filter.fromBlock != null &&
             filter.toBlock != null &&
             filter.toBlock - filter.fromBlock >
-                this.etherscanConfig.rangeThreshold
+            this.etherscanConfig.rangeThreshold
         ) {
             return this.getLogsByApi(filter);
         } else {
@@ -79,24 +89,36 @@ class AssistedJsonRpcProvider extends Provider {
     async getLogsByApi(filter) {
         let filters = translateFilter(filter);
 
-        let all = [];
-        for (let index = 0; index < filters.length; index++) {
-            const f = filters[index];
-            const logs = await this.scanLogs(f);
-            // console.info(
-            //     `Get log from ${f.fromBlock} to ${f.toBlock} have ${logs.length}`
-            // );
-            all = mergeTwoUniqSortedLogs(all, logs);
-        }
+        const logss = await Promise.all(filters.map(filter => this.scanLogs(filter)))
+        const all = logss.reduce((result,logs)=>{
+            return mergeTwoUniqSortedLogs(result, logs)
+        },[])
         all.forEach(
             (log) => (log.address = ethers.utils.getAddress(log.address))
         );
         return all;
     }
+    index = 0;
+    getThrottle() {
+        if (this.throttles.size <= 0) return {
+            throttle: this.throttleDefault,
+            apiKey: null
+        }
+        if (this.index > this.etherscanConfig.apiKeys.length - 1) this.index = 0
+        const apiKey = this.etherscanConfig.apiKeys[this.index]
+        this.index++
+        return {
+            throttle: this.throttles.get(apiKey),
+            apiKey
+        }
+    }
     async search(url) {
         try {
             while (true) {
-                const res = await this.throttle(() =>
+                const { throttle, apiKey } = this.getThrottle()
+                if (apiKey != null) url += `&apikey=${apiKey}`
+                console.info(this.index, 'url', url)
+                const res = await throttle(() =>
                     fetch(url).then((res) => res.json())
                 );
                 if (Array.isArray(res.result)) {
