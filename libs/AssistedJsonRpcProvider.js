@@ -20,19 +20,13 @@ class AssistedJsonRpcProvider extends Provider {
         super();
         this.provider = provider;
         this.etherscanConfig = etherscanConfig;
-        this.throttleDefault = throttledQueue(
+        this.throttles = etherscanConfig.apiKeys && etherscanConfig.apiKeys.length ? etherscanConfig.apiKeys.map(() => throttledQueue(
             etherscanConfig.rateLimitCount,
             etherscanConfig.rateLimitDuration
-        );
-        this.throttles = new Map()
-        if (etherscanConfig.apiKeys && etherscanConfig.apiKeys.length) {
-            etherscanConfig.apiKeys.forEach(apiKey => {
-                this.throttles.set(apiKey, throttledQueue(
-                    5,
-                    1000
-                ))
-            })
-        }
+        )) : [throttledQueue(
+            etherscanConfig.rateLimitCount,
+            etherscanConfig.rateLimitDuration
+        )]
     }
     getBalance(...args) {
         return this.provider.getBalance(args);
@@ -100,16 +94,14 @@ class AssistedJsonRpcProvider extends Provider {
     }
     index = 0;
     getThrottle() {
-        if (this.throttles.size <= 0) return {
-            throttle: this.throttleDefault,
+        if (!this.etherscanConfig.apiKeys || this.etherscanConfig.apiKeys.length <= 0) return {
+            throttle: this.throttles[0],
             apiKey: null
         }
         if (this.index > this.etherscanConfig.apiKeys.length - 1) this.index = 0
-        const apiKey = this.etherscanConfig.apiKeys[this.index]
-        this.index++
         return {
-            throttle: this.throttles.get(apiKey),
-            apiKey
+            throttle: this.throttles[this.index],
+            apiKey: this.etherscanConfig.apiKeys[this.index++]
         }
     }
     async search(url) {
@@ -117,7 +109,6 @@ class AssistedJsonRpcProvider extends Provider {
             while (true) {
                 const { throttle, apiKey } = this.getThrottle()
                 if (apiKey != null) url += `&apikey=${apiKey}`
-                console.info(this.index, 'url', url)
                 const res = await throttle(() =>
                     fetch(url).then((res) => res.json())
                 );
