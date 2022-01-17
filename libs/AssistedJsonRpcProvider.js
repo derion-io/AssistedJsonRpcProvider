@@ -19,14 +19,18 @@ class AssistedJsonRpcProvider extends Provider {
     ) {
         super();
         this.provider = provider;
+        if (!etherscanConfig.apiKeys?.length) {
+            etherscanConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
+        }
         this.etherscanConfig = etherscanConfig;
-        this.throttles = etherscanConfig.apiKeys && etherscanConfig.apiKeys.length ? etherscanConfig.apiKeys.map(() => throttledQueue(
-            etherscanConfig.rateLimitCount,
-            etherscanConfig.rateLimitDuration
-        )) : [throttledQueue(
-            etherscanConfig.rateLimitCount,
-            etherscanConfig.rateLimitDuration
-        )]
+        this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
+            const queue = throttledQueue(
+                etherscanConfig.rateLimitCount,
+                etherscanConfig.rateLimitDuration,
+            )
+            queue.apiKey = apiKey
+            return queue
+        })
     }
     getBalance(...args) {
         return this.provider.getBalance(args);
@@ -84,32 +88,24 @@ class AssistedJsonRpcProvider extends Provider {
         let filters = translateFilter(filter);
 
         const logss = await Promise.all(filters.map(filter => this.scanLogs(filter)))
-        const all = logss.reduce((result,logs)=>{
+        const all = logss.reduce((result, logs) => {
             return mergeTwoUniqSortedLogs(result, logs)
-        },[])
+        }, [])
         all.forEach(
             (log) => (log.address = ethers.utils.getAddress(log.address))
         );
         return all;
     }
-    index = 0;
-    getThrottle() {
-        if (!this.etherscanConfig.apiKeys || this.etherscanConfig.apiKeys.length <= 0) return {
-            throttle: this.throttles[0],
-            apiKey: null
-        }
-        if (this.index > this.etherscanConfig.apiKeys.length - 1) this.index = 0
-        return {
-            throttle: this.throttles[this.index],
-            apiKey: this.etherscanConfig.apiKeys[this.index++]
-        }
+    getQueue() {
+        this.index = (this.index < this.queues.length - 1) ? (this.index + 1) : 0
+        return this.queues[this.index]
     }
     async search(url) {
         try {
             while (true) {
-                const { throttle, apiKey } = this.getThrottle()
-                if (apiKey != null) url += `&apikey=${apiKey}`
-                const res = await throttle(() =>
+                const queue = this.getQueue()
+                url += `&apikey=${queue.apiKey}`
+                const res = await queue(() =>
                     fetch(url).then((res) => res.json())
                 );
                 if (Array.isArray(res.result)) {

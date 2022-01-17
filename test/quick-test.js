@@ -5,8 +5,8 @@ const run = async () => {
     const provider = new AssistedJsonRpcProvider(
         new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org'),
         {
-            rateLimitCount: 1,
-            rateLimitDuration: 5000,
+            rateLimitCount: 5,
+            rateLimitDuration: 1000,
             rangeThreshold: 5000,
             maxResults: 1000,
             url: 'https://api.bscscan.com/api',
