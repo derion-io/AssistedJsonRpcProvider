@@ -149,9 +149,9 @@ class AssistedJsonRpcProvider extends Provider {
         try {
             while (true) {
                 const queue = this.getQueue()
-                url += `&apikey=${queue.apiKey}`
+                const urlApiKey = url + `&apikey=${queue.apiKey}`
                 const res = await queue(() =>
-                    fetch(url).then((res) => res.json())
+                    fetch(urlApiKey).then((res) => res.json())
                 );
                 if (Array.isArray(res.result)) {
                     return res.result;
@@ -173,7 +173,11 @@ class AssistedJsonRpcProvider extends Provider {
             if (logs.length < this.etherscanConfig.maxResults) {
                 return result.concat(logs);
             }
-            fromBlock = Number(_.maxBy(logs, 'blockNumber').blockNumber) + 1;
+            fromBlock = Number(_.maxBy(logs, 'blockNumber').blockNumber);
+
+            // Truncate forward 1 block
+            logs = logs.filter(log => Number(log.blockNumber) < fromBlock)
+            
             result = result.concat(logs);
         }
     }
