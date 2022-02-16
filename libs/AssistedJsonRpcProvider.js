@@ -1,9 +1,11 @@
 const { mergeTwoUniqSortedLogs, translateFilter } = require('../utils');
-const throttledQueue = require('throttled-queue');
 const fetch = require('node-fetch');
 const _ = require('lodash');
 const ethers = require('ethers');
+const AsyncTaskThrottle = require('async-task-throttle-on-response').default
 const { Provider } = require('@ethersproject/providers');
+const { standardizeStartConfiguration } = require('./validator');
+
 // const DefaultAPIKey = 'YD1424ACBTAZBRJWEIHAPHFZMT69MZXBBI'
 class AssistedJsonRpcProvider extends Provider {
     constructor(
@@ -19,15 +21,13 @@ class AssistedJsonRpcProvider extends Provider {
     ) {
         super();
         this.provider = provider;
-        if (!etherscanConfig.apiKeys?.length) {
-            etherscanConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
+        let validConfig = standardizeStartConfiguration(etherscanConfig)
+        if (!validConfig.apiKeys?.length) {
+            validConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
         }
-        this.etherscanConfig = etherscanConfig;
+        this.etherscanConfig = validConfig;
         this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
-            const queue = throttledQueue(
-                etherscanConfig.rateLimitCount,
-                etherscanConfig.rateLimitDuration,
-            )
+            const queue = AsyncTaskThrottle.create(fetch, validConfig.rateLimitCount, validConfig.rateLimitDuration)
             queue.apiKey = apiKey
             return queue
         })
@@ -150,11 +150,13 @@ class AssistedJsonRpcProvider extends Provider {
             while (true) {
                 const queue = this.getQueue()
                 const urlApiKey = url + `&apikey=${queue.apiKey}`
-                const res = await queue(() =>
-                    fetch(urlApiKey).then((res) => res.json())
-                );
+
+                const res = await queue(urlApiKey).then((res) => res.json());
+
                 if (Array.isArray(res.result)) {
                     return res.result;
+                } else {
+                    console.info(res)
                 }
             }
         } catch (error) {
@@ -169,15 +171,18 @@ class AssistedJsonRpcProvider extends Provider {
                 ...filter,
                 fromBlock,
             });
+
             let logs = await this.search(url);
+
             if (logs.length < this.etherscanConfig.maxResults) {
                 return result.concat(logs);
             }
+
             fromBlock = Number(_.maxBy(logs, 'blockNumber').blockNumber);
 
             // Truncate forward 1 block
             logs = logs.filter(log => Number(log.blockNumber) < fromBlock)
-            
+
             result = result.concat(logs);
         }
     }

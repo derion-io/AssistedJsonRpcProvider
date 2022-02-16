@@ -376,6 +376,14 @@ argparse@^1.0.7:
   dependencies:
     sprintf-js "~1.0.2"
 
+async-task-throttle-on-response@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/async-task-throttle-on-response/-/async-task-throttle-on-response-1.0.1.tgz#cca646d6f45dad3a345de1e2fce655d3ed162afc"
+  integrity sha512-QkPkgozkqL04ondFdwEMnBMGMHfSvMTcFiWPQC8un1NJuFZweTXVIbgPPROW8yD22Mm+IxFCBBOLEK5fILo+AA==
+  dependencies:
+    driftless "^2.0.3"
+    node-fetch "2.2.0"
+
 balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
@@ -480,6 +488,13 @@ diff@3.5.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
   integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
+
+driftless@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/driftless/-/driftless-2.0.3.tgz#4378cade7aa8e39dee33faa94413bdc67850d90b"
+  integrity sha512-hSDKsQphnL4O0XLAiyWQ8EiM9suXH0Qd4gMtwF86b5wygGV8r95w0JcA38FOmx9N3LjFCIHLG2winLPNken4Tg==
+  dependencies:
+    present "^0.0.3"
 
 elliptic@6.5.4:
   version "6.5.4"
@@ -920,6 +935,11 @@ node-fetch@2:
   dependencies:
     whatwg-url "^5.0.0"
 
+node-fetch@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.2.0.tgz#4ee79bde909262f9775f731e3656d0db55ced5b5"
+  integrity sha512-OayFWziIxiHY8bCUyLX6sTpDH8Jsbp4FfYd1j1f7vZyfgkcOnAyM4oQR16f8a0s7Gl/viMGRey8eScYk4V4EZA==
+
 object-inspect@^1.11.0, object-inspect@^1.9.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.12.0.tgz#6e2c120e868fd1fd18cb4f18c31741d0d6e776f0"
@@ -994,6 +1014,11 @@ path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
   integrity sha1-F0uSaHNVNP+8es5r9TpanhtcX18=
+
+present@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/present/-/present-0.0.3.tgz#5aefb8a5ddf6b34c65743bf1cde53523aac1c05a"
+  integrity sha1-Wu+4pd32s0xldDvxzeU1I6rBwFo=
 
 require-directory@^2.1.1:
   version "2.1.1"
@@ -1099,11 +1124,6 @@ supports-color@^5.3.0:
   integrity sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==
   dependencies:
     has-flag "^3.0.0"
-
-throttled-queue@^2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/throttled-queue/-/throttled-queue-2.1.2.tgz#52d39708ee5adf019091eed7c820e1def8544b22"
-  integrity sha512-tUa5+OEw0zqNeKFFc/meOruMylj3ZZSS1X1e8WqU2YZ5jFwIU0qQP8IMuLq1eIuqdhHukktwONajChwqEwMkqA==
 
 tr46@~0.0.3:
   version "0.0.3"
