@@ -155,8 +155,6 @@ class AssistedJsonRpcProvider extends Provider {
 
                 if (Array.isArray(res.result)) {
                     return res.result;
-                } else {
-                    console.info(res)
                 }
             }
         } catch (error) {
