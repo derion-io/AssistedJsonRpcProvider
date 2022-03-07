@@ -133,12 +133,22 @@ class AssistedJsonRpcProvider extends Provider {
         let filters = translateFilter(filter);
 
         const logss = await Promise.all(filters.map(filter => this.scanLogs(filter)))
+
+        logss.forEach(
+            (logs) => {
+                logs.forEach(log => {
+                    log.address = ethers.utils.getAddress(log.address)
+                    log.blockNumber = Number(log.blockNumber) || 0
+                    log.logIndex = Number(log.logIndex) || 0
+                })
+
+            }
+        );
+
         const all = logss.reduce((result, logs) => {
             return mergeTwoUniqSortedLogs(result, logs)
         }, [])
-        all.forEach(
-            (log) => (log.address = ethers.utils.getAddress(log.address))
-        );
+
         return all;
     }
     getQueue() {

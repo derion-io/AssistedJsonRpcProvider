@@ -11,7 +11,7 @@
         "mocha": "^6.2.2"
     },
     "scripts": {
-        "quick-test": "node test/quick-test.js",
+        "quick-test": "node test/quick-start/quick-start.js",
         "test": "mocha --recursive --timeout 20000 'test/**/*.spec.js'"
     },
     "main": "libs/index.js",
