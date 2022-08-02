@@ -24,6 +24,7 @@ const provider = new AssistedJsonRpcProvider(
         rangeThreshold: 1000,
         rateLimitCount: 1,
         rateLimitDuration: 5000,
+        apiKeys:['apikey']
     }
 )
 ```
