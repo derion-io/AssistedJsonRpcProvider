@@ -155,7 +155,7 @@ class AssistedJsonRpcProvider extends Provider {
                 if (Array.isArray(res.result)) {
                     // Convert hex string to number
                     res.result.forEach((log) => {
-                        log.address = utils.getAddress(log.address)
+                        log.address = ethers.utils.getAddress(log.address)
                         log.blockNumber = Number(log.blockNumber) || 0
                         log.transactionIndex = Number(log.transactionIndex) || 0
                         log.logIndex = Number(log.logIndex) || 0
