@@ -134,17 +134,6 @@ class AssistedJsonRpcProvider extends Provider {
 
         const logss = await Promise.all(filters.map(filter => this.scanLogs(filter)))
 
-        logss.forEach(
-            (logs) => {
-                logs.forEach(log => {
-                    log.address = ethers.utils.getAddress(log.address)
-                    log.blockNumber = Number(log.blockNumber) || 0
-                    log.logIndex = Number(log.logIndex) || 0
-                })
-
-            }
-        );
-
         const all = logss.reduce((result, logs) => {
             return mergeTwoUniqSortedLogs(result, logs)
         }, [])
@@ -164,6 +153,13 @@ class AssistedJsonRpcProvider extends Provider {
                 const res = await queue(urlApiKey).then((res) => res.json());
 
                 if (Array.isArray(res.result)) {
+                    // Convert hex string to number
+                    res.result.forEach((log) => {
+                        log.address = ethers.utils.getAddress(log.address)
+                        log.blockNumber = Number(log.blockNumber) || 0
+                        log.transactionIndex = Number(log.transactionIndex) || 0
+                        log.logIndex = Number(log.logIndex) || 0
+                    })
                     return res.result;
                 }
             }
@@ -185,11 +181,14 @@ class AssistedJsonRpcProvider extends Provider {
             if (logs.length < this.etherscanConfig.maxResults) {
                 return result.concat(logs);
             }
+            let maxLog = _.maxBy(logs, 'blockNumber')
 
-            fromBlock = Number(_.maxBy(logs, 'blockNumber').blockNumber);
+            if (maxLog == null) return result // if Logs = []
+
+            fromBlock = Number(maxLog.blockNumber);
 
             // Truncate forward 1 block
-            logs = logs.filter(log => Number(log.blockNumber) < fromBlock)
+            logs = logs.filter((log) => Number(log.blockNumber) < fromBlock)
 
             result = result.concat(logs);
         }
