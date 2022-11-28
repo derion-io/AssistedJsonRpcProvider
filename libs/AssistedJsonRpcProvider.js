@@ -27,7 +27,7 @@ class AssistedJsonRpcProvider extends Provider {
         }
         this.etherscanConfig = validConfig;
         this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
-            const queue = AsyncTaskThrottle.create(fetch, validConfig.rateLimitCount, validConfig.rateLimitDuration)
+            const queue = AsyncTaskThrottle.create(fetch.bind(window), validConfig.rateLimitCount, validConfig.rateLimitDuration)
             queue.apiKey = apiKey
             return queue
         })
