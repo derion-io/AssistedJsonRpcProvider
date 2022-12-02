@@ -18,21 +18,24 @@ class AssistedJsonRpcProvider extends Provider {
             url: 'https://api.etherscan.io/api',
             maxResults: 1000,
             apiKeys: [],
-        }
+        },
+        useWeb3GetLogs = false,
     ) {
         super();
         this.provider = provider;
-        this.web3 = new Web3(provider['connection']['url'])
         let validConfig = standardizeStartConfiguration(etherscanConfig)
         if (!validConfig.apiKeys?.length) {
             validConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
         }
         this.etherscanConfig = validConfig;
         this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
-            const queue = AsyncTaskThrottle.create(fetch.bind(window), validConfig.rateLimitCount, validConfig.rateLimitDuration)
+            const queue = AsyncTaskThrottle.create(fetch, validConfig.rateLimitCount, validConfig.rateLimitDuration)
             queue.apiKey = apiKey
             return queue
         })
+        if(useWeb3GetLogs){
+            this.web3 = new Web3(provider['connection']['url'])
+        }
     }
     // Queries
     getBalance(...args) {
@@ -129,7 +132,10 @@ class AssistedJsonRpcProvider extends Provider {
         }
     }
     async getLogsDefault(filter) {
-        return this.web3.getPastLogs(filter);
+        if(this.useWeb3GetLogs){
+            return this.web3.eth.getPastLogs(filter);
+        }
+        return this.provider.getLogs(filter);
     }
     async getLogsByApi(filter) {
         let filters = translateFilter(filter);
