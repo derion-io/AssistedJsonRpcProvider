@@ -5,6 +5,7 @@ const ethers = require('ethers');
 const AsyncTaskThrottle = require('async-task-throttle-on-response').default
 const { Provider } = require('@ethersproject/providers');
 const { standardizeStartConfiguration } = require('./validator');
+const Web3 = require('web3');
 
 // const DefaultAPIKey = 'YD1424ACBTAZBRJWEIHAPHFZMT69MZXBBI'
 class AssistedJsonRpcProvider extends Provider {
@@ -21,6 +22,7 @@ class AssistedJsonRpcProvider extends Provider {
     ) {
         super();
         this.provider = provider;
+        this.web3 = new Web3(provider['connection']['url'])
         let validConfig = standardizeStartConfiguration(etherscanConfig)
         if (!validConfig.apiKeys?.length) {
             validConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
@@ -127,7 +129,7 @@ class AssistedJsonRpcProvider extends Provider {
         }
     }
     async getLogsDefault(filter) {
-        return this.provider.getLogs(filter);
+        return this.web3.getPastLogs(filter);
     }
     async getLogsByApi(filter) {
         let filters = translateFilter(filter);
