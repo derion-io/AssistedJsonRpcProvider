@@ -163,9 +163,9 @@ describe("Test translate filter", () => {
 
 describe("Test web3", () => {
     it("getlogs", async () => {
-        const bscProvider = "https://bscrpc.com";
-        const provider = new ethers.providers.JsonRpcProvider(bscProvider);
-        const web3 = new Web3(bscProvider)
+        const bscRpc = "https://bscrpc.com";
+        const provider = new ethers.providers.JsonRpcProvider(bscRpc);
+        const web3 = new Web3(bscRpc)
         let as = new AssistedJsonRpcProvider(
             provider,
             {
@@ -197,11 +197,7 @@ describe("Test web3", () => {
                 ],
             ],
         });
-        console.log(log[0], log1[0]);
-        assert.deepEqual(log[0].address, log1[0].address);
-        assert.deepEqual(log[0].data, log1[0].data);
-        assert.deepEqual(log[0].transactionHash, log1[0].transactionHash);
-        assert.deepEqual(log[0].blockHash, log1[0].blockHash);
-        assert.deepEqual(log[0].topics, log1[0].topics);
+        delete log[0].id
+        assert.deepEqual(log[0], log1[0]);
     });
 });
