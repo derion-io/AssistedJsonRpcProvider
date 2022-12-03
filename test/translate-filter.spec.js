@@ -165,8 +165,19 @@ describe("Test web3", () => {
     it("getlogs", async () => {
         const bscProvider = "https://bscrpc.com";
         const provider = new ethers.providers.JsonRpcProvider(bscProvider);
-
-        let as = new AssistedJsonRpcProvider(provider, true);
+        const web3 = new Web3(bscProvider)
+        let as = new AssistedJsonRpcProvider(
+            provider,
+            {
+                rangeThreshold: 5000,
+                rateLimitCount: 1,
+                rateLimitDuration: 5000,
+                url: "https://api.etherscan.io/api",
+                maxResults: 1000,
+                apiKeys: [],
+            },
+            web3,
+        );
         let as1 = new AssistedJsonRpcProvider(provider);
         let log = await as.getLogsDefault({
             fromBlock: 23552002,
@@ -186,7 +197,11 @@ describe("Test web3", () => {
                 ],
             ],
         });
-        assert.deepEqual(log[0],log1[0])
+        console.log(log[0], log1[0]);
+        assert.deepEqual(log[0].address, log1[0].address);
+        assert.deepEqual(log[0].data, log1[0].data);
+        assert.deepEqual(log[0].transactionHash, log1[0].transactionHash);
+        assert.deepEqual(log[0].blockHash, log1[0].blockHash);
+        assert.deepEqual(log[0].topics, log1[0].topics);
     });
-
 });

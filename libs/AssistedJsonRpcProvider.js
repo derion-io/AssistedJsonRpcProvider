@@ -19,7 +19,7 @@ class AssistedJsonRpcProvider extends Provider {
             maxResults: 1000,
             apiKeys: [],
         },
-        useWeb3GetLogs = false,
+        web3 = false,
     ) {
         super();
         this.provider = provider;
@@ -33,8 +33,8 @@ class AssistedJsonRpcProvider extends Provider {
             queue.apiKey = apiKey
             return queue
         })
-        if(useWeb3GetLogs){
-            this.web3 = new Web3(provider['connection']['url'])
+        if(web3){
+            this.web3 = web3
         }
     }
     // Queries
@@ -132,7 +132,7 @@ class AssistedJsonRpcProvider extends Provider {
         }
     }
     async getLogsDefault(filter) {
-        if(this.useWeb3GetLogs){
+        if(this.web3){
             return this.web3.eth.getPastLogs(filter);
         }
         return this.provider.getLogs(filter);
