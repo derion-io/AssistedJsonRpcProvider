@@ -5,11 +5,11 @@
         "async-task-throttle-on-response": "^1.0.1",
         "ethers": "^5.5.3",
         "lodash": "^4.17.21",
-        "node-fetch": "2",
-        "web3": "^1.8.1"
+        "node-fetch": "2"
     },
     "devDependencies": {
-        "mocha": "^6.2.2"
+        "mocha": "^6.2.2",
+        "web3": "^1.8.1"
     },
     "scripts": {
         "quick-test": "node test/quick-start/quick-start.js",

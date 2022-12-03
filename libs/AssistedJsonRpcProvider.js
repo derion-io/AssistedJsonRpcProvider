@@ -5,7 +5,6 @@ const ethers = require('ethers');
 const AsyncTaskThrottle = require('async-task-throttle-on-response').default
 const { Provider } = require('@ethersproject/providers');
 const { standardizeStartConfiguration } = require('./validator');
-const Web3 = require('web3');
 
 // const DefaultAPIKey = 'YD1424ACBTAZBRJWEIHAPHFZMT69MZXBBI'
 class AssistedJsonRpcProvider extends Provider {
