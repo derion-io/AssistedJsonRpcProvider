@@ -17,7 +17,8 @@ class AssistedJsonRpcProvider extends Provider {
             url: 'https://api.etherscan.io/api',
             maxResults: 1000,
             apiKeys: [],
-        }
+        },
+        web3 = undefined,
     ) {
         super();
         this.provider = provider;
@@ -27,10 +28,13 @@ class AssistedJsonRpcProvider extends Provider {
         }
         this.etherscanConfig = validConfig;
         this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
-            const queue = AsyncTaskThrottle.create(fetch.bind(window), validConfig.rateLimitCount, validConfig.rateLimitDuration)
+            const queue = AsyncTaskThrottle.create(fetch.bind(typeof window !== 'undefined' ? window : this), validConfig.rateLimitCount, validConfig.rateLimitDuration)
             queue.apiKey = apiKey
             return queue
         })
+        if (web3) {
+            this.web3 = web3
+        }
     }
     // Queries
     getBalance(...args) {
@@ -127,6 +131,9 @@ class AssistedJsonRpcProvider extends Provider {
         }
     }
     async getLogsDefault(filter) {
+        if (this.web3) {
+            return this.web3.eth.getPastLogs(filter);
+        }
         return this.provider.getLogs(filter);
     }
     async getLogsByApi(filter) {
