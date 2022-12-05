@@ -1,4 +1,4 @@
-const { mergeTwoUniqSortedLogs, translateFilter } = require('../utils');
+const { mergeTwoUniqSortedLogs, translateFilter, isOrMode } = require('../utils');
 const fetch = require('node-fetch');
 const _ = require('lodash');
 const ethers = require('ethers');
@@ -122,20 +122,22 @@ class AssistedJsonRpcProvider extends Provider {
     }
     // Override
     async getLogs(filter) {
-        if (
-            this.etherscanConfig &&
+        const scanMode = this.etherscanConfig &&
             filter.fromBlock != null &&
             filter.toBlock != null &&
             filter.toBlock - filter.fromBlock >
             this.etherscanConfig.rangeThreshold
-        ) {
-            return this.getLogsByApi(filter);
-        }
-        const orMode =  filter?.topics?.some(topic => topic != null && topic.length > 0 && topic[0] == null)
+        const orMode = isOrMode(filter.topics)
         if (!orMode) {
+            if (scanMode) {
+                return this.getLogsByApi(filter);
+            }
             return this.getLogsByRpc(filter)
         }
-        const orFilters = []
+        if (scanMode) {
+            return this.scanLogs(filter)
+        }
+        const filters = []
         const maxLength = _.max(filter.topics.map(topic => topic?.length))
         for (let i = 0; i < maxLength; ++i) {
             const f = {
@@ -148,11 +150,11 @@ class AssistedJsonRpcProvider extends Provider {
                 ]
             }
             if (f.topics.some(topic => topic != null)) {
-                orFilters.push(f)
+                filters.push(f)
             }
         }
         const logss = await Promise.all(
-            orFilters.map(filter => this.getLogsByRpc(filter)),
+            filters.map(filter => this.getLogsByRpc(filter)),
         )
         const logs = _.uniqBy(logss.flat(), log => log.transactionHash + log.logIndex)
         return logs
@@ -245,7 +247,7 @@ class AssistedJsonRpcProvider extends Provider {
 }
 
 function getTopicsQuery(topics) {
-    const orMode = topics?.some(topic => topic != null && topic.length > 0 && topic[0] == null)
+    const orMode = isOrMode(topics)
     let query = ''
     if (!orMode) {
         topics.forEach((topic, index) => {
