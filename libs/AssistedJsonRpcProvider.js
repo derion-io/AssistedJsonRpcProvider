@@ -1,4 +1,4 @@
-const { mergeTwoUniqSortedLogs, translateFilter } = require('../utils');
+const { mergeTwoUniqSortedLogs, translateFilter, isOrMode } = require('../utils');
 const fetch = require('node-fetch');
 const _ = require('lodash');
 const ethers = require('ethers');
@@ -122,15 +122,44 @@ class AssistedJsonRpcProvider extends Provider {
     }
     // Override
     async getLogs(filter) {
-        if (
-            this.etherscanConfig &&
+        const scanMode = this.etherscanConfig &&
             filter.fromBlock != null &&
             filter.toBlock != null &&
             filter.toBlock - filter.fromBlock >
             this.etherscanConfig.rangeThreshold
-        ) {
-            return this.getLogsByApi(filter);
+        const orMode = isOrMode(filter.topics)
+        if (!orMode) {
+            if (scanMode) {
+                return this.getLogsByApi(filter);
+            }
+            return this.getLogsByRpc(filter)
         }
+        if (scanMode) {
+            return this.scanLogs(filter)
+        }
+        const filters = []
+        const maxLength = _.max(filter.topics.map(topic => topic?.length))
+        for (let i = 0; i < maxLength; ++i) {
+            const f = {
+                ...filter,
+                topics: [
+                    filter?.topics?.[0]?.[i],
+                    filter?.topics?.[1]?.[i],
+                    filter?.topics?.[2]?.[i],
+                    filter?.topics?.[3]?.[i],
+                ]
+            }
+            if (f.topics.some(topic => topic != null)) {
+                filters.push(f)
+            }
+        }
+        const logss = await Promise.all(
+            filters.map(filter => this.getLogsByRpc(filter)),
+        )
+        const logs = _.uniqBy(logss.flat(), log => log.transactionHash + log.logIndex)
+        return logs
+    }
+    getLogsByRpc(filter) {
         if (this.web3) {
             return this.web3.eth.getPastLogs(filter);
         }
@@ -206,9 +235,7 @@ class AssistedJsonRpcProvider extends Provider {
             if (Object.prototype.hasOwnProperty.call(filter, key)) {
                 const value = filter[key];
                 if (key == 'topics') {
-                    value.forEach((topic, index) => {
-                        url += topic != null ? `&topic${index}=${topic}` : '';
-                    });
+                    url += getTopicsQuery(value)
                 } else {
                     url += value != null ? `&${key}=${value}` : '';
                 }
@@ -217,6 +244,33 @@ class AssistedJsonRpcProvider extends Provider {
         // url+=`&apikey=${DefaultAPIKey}`
         return url;
     }
+}
+
+function getTopicsQuery(topics) {
+    const orMode = isOrMode(topics)
+    let query = ''
+    if (!orMode) {
+        topics.forEach((topic, index) => {
+            query += topic != null ? `&topic${index}=${topic}` : ''
+        })
+        return query
+    }
+    const ts = []
+    for (let i = 0; i < 4; ++i) {
+        ts.push(topics[i]?.[i])
+    }
+    for (
+        let iLast = undefined, i = _.findIndex(ts, topic => topic != null);
+        i >= 0;
+        iLast = i, i = _.findIndex(ts, topic => topic != null, iLast+1)
+    ) {
+        if (ts[i] == null) continue
+        query += `&topic${i}=${ts[i]}`
+        if (iLast) {
+            query += `&topic${iLast}_${i}_opr=or`
+        }
+    }
+    return query
 }
 
 module.exports = AssistedJsonRpcProvider;

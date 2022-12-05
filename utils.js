@@ -120,10 +120,14 @@ const translateFilter = (filter)=>{
     }
     return filters
 }
+const isOrMode = (topics) => {
+  return topics?.some(topic => topic != null && topic.length > 0 && topic[0] == null)
+}
 module.exports = {
     convert,
     split,
     explode,
     mergeTwoUniqSortedLogs,
-    translateFilter
+    translateFilter,
+    isOrMode,
 }
