@@ -122,6 +122,36 @@ describe('Test translate filter', () => {
             }
         ]);
     });
+    it('Test with trailing null topics', async () => {
+        const filters3 = translateFilter({
+            address: 'address1',
+            topics: [
+                ['topic0'],
+                ['account1', 'account2'],
+                ['account3', 'account4'],
+                null,
+                undefined,
+            ],
+        });
+        assert.deepEqual(filters3, [
+            {
+                address: 'address1',
+                topics: ['topic0', 'account1', 'account3'],
+            },
+            {
+                address: 'address1',
+                topics: ['topic0', 'account1', 'account4'],
+            },
+            {
+                address: 'address1',
+                topics: ['topic0', 'account2', 'account3'],
+            },
+            {
+                address: 'address1',
+                topics: ['topic0', 'account2', 'account4'],
+            },
+        ]);
+    });
     it('Test some address', async () => {
         const filters = translateFilter({
             fromBlock: 1000,

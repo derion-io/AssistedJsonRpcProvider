@@ -108,6 +108,10 @@ function explode(s) {
  * @returns
  */
 const translateFilter = (filter)=>{
+    // remove trailing null topics
+    while(filter?.topics?.length && filter.topics[filter.topics.length-1] == null) {
+      filter.topics.pop()
+    }
     let filters = split(convert(filter));
     if (Array.isArray(filters)) {
       filters = filters.map((e) => explode(e));
