@@ -6,32 +6,36 @@ const AsyncTaskThrottle = require('async-task-throttle-on-response').default
 const { Provider } = require('@ethersproject/providers');
 const { standardizeStartConfiguration } = require('./validator');
 
-// const DefaultAPIKey = 'YD1424ACBTAZBRJWEIHAPHFZMT69MZXBBI'
+/**
+ * etherscanConfig = {
+ *  rangeThreshold: 5000,
+ *  rateLimitCount: 1,
+ *  rateLimitDuration: 5000,
+ *  url: 'https://api.etherscan.io/api',
+ *  maxResults: 1000,
+ *  apiKeys: ['YourApiKeyToken'],
+ * }
+ */
 class AssistedJsonRpcProvider extends Provider {
     constructor(
         provider,
-        etherscanConfig = {
-            rangeThreshold: 5000,
-            rateLimitCount: 1,
-            rateLimitDuration: 5000,
-            url: 'https://api.etherscan.io/api',
-            maxResults: 1000,
-            apiKeys: [],
-        },
-        web3 = undefined,
+        etherscanConfig,
+        web3,
     ) {
         super();
         this.provider = provider;
-        let validConfig = standardizeStartConfiguration(etherscanConfig)
-        if (!validConfig.apiKeys?.length) {
-            validConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
+        if (etherscanConfig != null) {
+            let validConfig = standardizeStartConfiguration(etherscanConfig)
+            if (!validConfig.apiKeys?.length) {
+                validConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
+            }
+            this.etherscanConfig = validConfig;
+            this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
+                const queue = AsyncTaskThrottle.create(fetch.bind(typeof window !== 'undefined' ? window : this), validConfig.rateLimitCount, validConfig.rateLimitDuration)
+                queue.apiKey = apiKey
+                return queue
+            })
         }
-        this.etherscanConfig = validConfig;
-        this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
-            const queue = AsyncTaskThrottle.create(fetch.bind(typeof window !== 'undefined' ? window : this), validConfig.rateLimitCount, validConfig.rateLimitDuration)
-            queue.apiKey = apiKey
-            return queue
-        })
         if (web3) {
             this.web3 = web3
         }
