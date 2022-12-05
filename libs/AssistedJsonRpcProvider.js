@@ -131,6 +131,33 @@ class AssistedJsonRpcProvider extends Provider {
         ) {
             return this.getLogsByApi(filter);
         }
+        const orMode =  filter?.topics?.some(topic => topic != null && topic.length > 0 && topic[0] == null)
+        if (!orMode) {
+            return this.getLogsByRpc(filter)
+        }
+        const orFilters = []
+        const maxLength = _.max(filter.topics.map(topic => topic?.length))
+        for (let i = 0; i < maxLength; ++i) {
+            const f = {
+                ...filter,
+                topics: [
+                    filter?.topics?.[0]?.[i],
+                    filter?.topics?.[1]?.[i],
+                    filter?.topics?.[2]?.[i],
+                    filter?.topics?.[3]?.[i],
+                ]
+            }
+            if (f.topics.some(topic => topic != null)) {
+                orFilters.push(f)
+            }
+        }
+        const logss = await Promise.all(
+            orFilters.map(filter => this.getLogsByRpc(filter)),
+        )
+        const logs = _.uniqBy(logss.flat(), log => log.transactionHash + log.logIndex)
+        return logs
+    }
+    getLogsByRpc(filter) {
         if (this.web3) {
             return this.web3.eth.getPastLogs(filter);
         }
@@ -206,9 +233,7 @@ class AssistedJsonRpcProvider extends Provider {
             if (Object.prototype.hasOwnProperty.call(filter, key)) {
                 const value = filter[key];
                 if (key == 'topics') {
-                    value.forEach((topic, index) => {
-                        url += topic != null ? `&topic${index}=${topic}` : '';
-                    });
+                    url += getTopicsQuery(value)
                 } else {
                     url += value != null ? `&${key}=${value}` : '';
                 }
@@ -217,6 +242,33 @@ class AssistedJsonRpcProvider extends Provider {
         // url+=`&apikey=${DefaultAPIKey}`
         return url;
     }
+}
+
+function getTopicsQuery(topics) {
+    const orMode = topics?.some(topic => topic != null && topic.length > 0 && topic[0] == null)
+    let query = ''
+    if (!orMode) {
+        topics.forEach((topic, index) => {
+            query += topic != null ? `&topic${index}=${topic}` : ''
+        })
+        return query
+    }
+    const ts = []
+    for (let i = 0; i < 4; ++i) {
+        ts.push(topics[i]?.[i])
+    }
+    for (
+        let iLast = undefined, i = _.findIndex(ts, topic => topic != null);
+        i >= 0;
+        iLast = i, i = _.findIndex(ts, topic => topic != null, iLast+1)
+    ) {
+        if (ts[i] == null) continue
+        query += `&topic${i}=${ts[i]}`
+        if (iLast) {
+            query += `&topic${iLast}_${i}_opr=or`
+        }
+    }
+    return query
 }
 
 module.exports = AssistedJsonRpcProvider;

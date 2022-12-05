@@ -108,6 +108,10 @@ function explode(s) {
  * @returns
  */
 const translateFilter = (filter)=>{
+    const orMode = filter?.topics?.some(topic => topic != null && topic.length > 0 && topic[0] == null)
+    if (orMode) {
+      return [filter]
+    }
     // remove trailing null topics
     while(filter?.topics?.length && filter.topics[filter.topics.length-1] == null) {
       filter.topics.pop()

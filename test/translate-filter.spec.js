@@ -191,6 +191,40 @@ describe('Test translate filter', () => {
     });
 });
 
+describe('ormode', () => {
+    it("getlogs", async () => {
+        const bscRpc = "https://bscrpc.com";
+        const provider = new ethers.providers.JsonRpcProvider(bscRpc);
+        const providers = [
+            new AssistedJsonRpcProvider(
+                provider,
+                {
+                    rangeThreshold: 1000,
+                    rateLimitCount: 1,
+                    rateLimitDuration: 5000,
+                    url: "https://api.bscscan.com/api",
+                    maxResults: 1000,
+                    apiKeys: [],
+                },
+            ),
+            new AssistedJsonRpcProvider(provider),
+        ]
+        const filter = {
+            fromBlock: 22455468,
+            toBlock: 22455468 + 1001,
+            topics: [
+                null,
+                [null, '0x000000000000000000000000C06F7cF8C9e8a8D39b0dF5A105d66127912Bc980', null],
+                [null, null, '0x44444c0000000000000000000000000000000000000000000000000000000000'],
+            ]
+        }
+        const logs = await Promise.all(providers.map((provider, i) => provider.getLogs(filter)))
+        assert.equal(logs[0].length, logs[1].length)
+        logs[0].forEach(log => delete log.id)
+        assert.deepEqual(logs[0].map(log => log.transactionHash + log.logIndex), logs[1].map(log => log.transactionHash + log.logIndex));
+    });
+})
+
 describe("Test web3", () => {
     it("getlogs", async () => {
         const bscRpc = "https://bscrpc.com";
