@@ -179,7 +179,7 @@ describe("Test web3", () => {
             web3,
         );
         let as1 = new AssistedJsonRpcProvider(provider);
-        let log = await as.getLogsDefault({
+        let log = await as.getLogs({
             fromBlock: 23552002,
             toBlock: 23552003,
             topics: [
@@ -188,7 +188,7 @@ describe("Test web3", () => {
                 ],
             ],
         });
-        let log1 = await as1.getLogsDefault({
+        let log1 = await as1.getLogs({
             fromBlock: 23552002,
             toBlock: 23552003,
             topics: [

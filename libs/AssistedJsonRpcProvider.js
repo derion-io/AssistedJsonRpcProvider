@@ -126,11 +126,7 @@ class AssistedJsonRpcProvider extends Provider {
             this.etherscanConfig.rangeThreshold
         ) {
             return this.getLogsByApi(filter);
-        } else {
-            return this.getLogsDefault(filter);
         }
-    }
-    async getLogsDefault(filter) {
         if (this.web3) {
             return this.web3.eth.getPastLogs(filter);
         }
