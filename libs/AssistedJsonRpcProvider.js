@@ -278,8 +278,10 @@ function getTopicsQuery(topics) {
  * @param items array
  */
 function trimTrailingNullItems (items) {
-  const endIndex = items.length - [...items].reverse().findIndex((i => i != null))
-  return items.slice(0, endIndex)
+  while (items[items.length-1] == null) {
+    items.pop();
+  }
+  return items
 }
 
 module.exports = AssistedJsonRpcProvider;
