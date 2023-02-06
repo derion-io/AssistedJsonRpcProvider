@@ -147,7 +147,7 @@ class AssistedJsonRpcProvider extends Provider {
                     filter?.topics?.[1]?.[i],
                     filter?.topics?.[2]?.[i],
                     filter?.topics?.[3]?.[i],
-                ]
+                ].filter((topic) => topic !== undefined)
             }
             if (f.topics.some(topic => topic != null)) {
                 filters.push(f)
