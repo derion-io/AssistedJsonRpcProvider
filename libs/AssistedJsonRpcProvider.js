@@ -142,12 +142,12 @@ class AssistedJsonRpcProvider extends Provider {
         for (let i = 0; i < maxLength; ++i) {
             const f = {
                 ...filter,
-                topics: trimTrailingNullItems([
+                topics: [
                     filter?.topics?.[0]?.[i],
                     filter?.topics?.[1]?.[i],
                     filter?.topics?.[2]?.[i],
                     filter?.topics?.[3]?.[i],
-                ])
+                ].filter((topic) => topic !== undefined)
             }
             if (f.topics.some(topic => topic != null)) {
                 filters.push(f)
@@ -266,22 +266,11 @@ function getTopicsQuery(topics) {
     ) {
         if (ts[i] == null) continue
         query += `&topic${i}=${ts[i]}`
-        if (iLast) {
+        if (iLast !== undefined) {
             query += `&topic${iLast}_${i}_opr=or`
         }
     }
     return query
-}
-
-/**
- *
- * @param items array
- */
-function trimTrailingNullItems (items) {
-  while (items[items.length-1] == null) {
-    items.pop();
-  }
-  return items
 }
 
 module.exports = AssistedJsonRpcProvider;
