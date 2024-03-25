@@ -266,7 +266,7 @@ function getTopicsQuery(topics) {
     ) {
         if (ts[i] == null) continue
         query += `&topic${i}=${ts[i]}`
-        if (iLast) {
+        if (iLast !== undefined) {
             query += `&topic${iLast}_${i}_opr=or`
         }
     }
