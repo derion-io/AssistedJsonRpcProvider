@@ -22,7 +22,7 @@
     },
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/launchzone/AssistedJsonRpcProvider/issues"
+        "url": "https://github.com/derion-io/AssistedJsonRpcProvider/issues"
     },
-    "homepage": "https://github.com/launchzone/AssistedJsonRpcProvider"
+    "homepage": "https://github.com/derion-io/AssistedJsonRpcProvider"
 }
