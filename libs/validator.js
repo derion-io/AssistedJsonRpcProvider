@@ -4,6 +4,7 @@ function standardizeStartConfiguration(config) {
     }
 
     const knownProps = [
+        'trace',
         'rangeThreshold',
         'rateLimitCount',
         'rateLimitDuration',

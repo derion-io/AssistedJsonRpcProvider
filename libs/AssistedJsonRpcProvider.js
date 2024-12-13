@@ -128,6 +128,9 @@ class AssistedJsonRpcProvider extends Provider {
             filter.toBlock - filter.fromBlock >
             this.etherscanConfig.rangeThreshold
         const orMode = isOrMode(filter.topics)
+        if (this.etherscanConfig.trace) {
+            console.log('AssistedJsonRpcProvider.getLogs', { scanMode, orMode })
+        }
         if (!orMode) {
             if (scanMode) {
                 return this.getLogsByApi(filter);
@@ -160,6 +163,9 @@ class AssistedJsonRpcProvider extends Provider {
         return logs
     }
     getLogsByRpc(filter) {
+        if (this.etherscanConfig.trace) {
+            console.log('AssistedJsonRpcProvider.getLogsByRpc', filter)
+        }
         if (this.web3) {
             return this.web3.eth.getPastLogs(filter);
         }
@@ -212,6 +218,9 @@ class AssistedJsonRpcProvider extends Provider {
                 fromBlock,
             });
 
+            if (this.etherscanConfig.trace) {
+                console.log('AssistedJsonRpcProvider.scanLogs', url)
+            }
             let logs = await this.search(url);
 
             if (logs.length < this.etherscanConfig.maxResults) {
