@@ -13,7 +13,7 @@ const { AssistedJsonRpcProvider } = require('assisted-json-rpc-provider')
 //  * config.rangeThreshold {number}. Threshold range to know whether to use Log API or ethers.provider's getLogs. Default: 5000. 
 //  * config.rateLimitCount and config.rateLimitDuration {number}. Default: Rate-limit's Log API is 1 calls/5second
 //  * config.apiKeys {string[]}. Using api-key to improve rate-limit
-//
+//  * config.singleRequest {boolean}. If true, only return the results of the first request
 //  * return the customized ethers.Provider for getLogs with massive ranges
 
 const provider = new AssistedJsonRpcProvider(
@@ -24,7 +24,8 @@ const provider = new AssistedJsonRpcProvider(
         rangeThreshold: 1000,
         rateLimitCount: 1,
         rateLimitDuration: 5000,
-        apiKeys:['apikey']
+        apiKeys:['apikey'],
+        singleRequest: false
     }
 )
 ```

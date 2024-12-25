@@ -10,13 +10,15 @@ function standardizeStartConfiguration(config) {
         'rateLimitDuration',
         'url',
         'maxResults',
-        'apiKeys'
+        'apiKeys',
+        'singleRequest'
     ]
 
     _validateRangeThreshold(config.rangeThreshold)
     _validateRateLimitCount(config.rateLimitCount)
     _validateRateLimitDuration(config.rateLimitDuration)
     _validateMaxResult(config.maxResults)
+    _validateSingleRequest(config.singleRequest)
 
     const unknownProp = Object.keys(config).find(prop => !knownProps.includes(prop))
     if (unknownProp) {
@@ -27,7 +29,8 @@ function standardizeStartConfiguration(config) {
         maxResults: 1000,
         rateLimitCount: 1,
         rateLimitDuration: 5 * 1000,
-        apiKeys: []
+        apiKeys: [],
+        singleRequest: false
     }
     return Object.assign(defaultConfig, config)
 }
@@ -69,6 +72,16 @@ function _validateMaxResult(value){
 
     if (!Number.isInteger(value) || value < 1) {
         throw new Error('invalid configuration "maxResults"')
+    }
+}
+
+function _validateSingleRequest(value){
+    if (value == null) {
+        return
+    }
+
+    if (typeof value !== "boolean") {
+        throw new Error('invalid configuration "singleRequest"')
     }
 }
 
