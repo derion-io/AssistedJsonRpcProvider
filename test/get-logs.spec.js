@@ -12,6 +12,7 @@ describe('getLogs', () => {
         let as = new AssistedJsonRpcProvider(
             provider,
             {
+                trace: true,
                 rangeThreshold: 5000,
                 rateLimitCount: 1,
                 rateLimitDuration: 5000,
@@ -51,6 +52,7 @@ describe('getLogs', () => {
             new AssistedJsonRpcProvider(
                 provider,
                 {
+                    trace: true,
                     rangeThreshold: 1000,
                     rateLimitCount: 1,
                     rateLimitDuration: 5000,
