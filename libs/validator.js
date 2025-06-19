@@ -26,8 +26,8 @@ function standardizeStartConfiguration(config) {
     const defaultConfig = {
         rangeThreshold: 4000,
         maxResults: 1000,
-        rateLimitCount: 1,
-        rateLimitDuration: 5 * 1000,
+        rateLimitCount: 5,
+        rateLimitDuration: 1000,
     }
     return Object.assign(defaultConfig, config)
 }
