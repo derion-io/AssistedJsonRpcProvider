@@ -2,27 +2,25 @@ const { AssistedJsonRpcProvider } = require('../../libs/index');
 const { ethers } = require('ethers');
 const run = async () => {
     const provider = new AssistedJsonRpcProvider(
-        new ethers.providers.JsonRpcProvider('https://bsc-dataseed.binance.org'),
+        new ethers.providers.JsonRpcProvider('https://arbitrum.meowrpc.com'),
         {
             rateLimitCount: 1,
             rateLimitDuration: 5000,
             rangeThreshold: 5000,
             maxResults: 1000,
-            url: 'https://api.etherscan.io/v2/api?chainid=56',
-            // apiKeys:[]
+            url: 'https://api.etherscan.io/v2/api?chainid=42161',
+            apiKeys:["J69FYQXEYQKAA3I13U121IGAZPQV6RRZBU"]
         }
     );
-    console.time("Scan")
+    console.log("Scan")
     const logs = await provider.getLogs({
-        fromBlock: 0,
-        toBlock: 14328200,
+        fromBlock: 261545891,
+        toBlock: 347909804,
         topics: [
-            null,
-            [
-                '0x000000000000000000000000efebf78ae76268b27bcac3e225bec2539212215d',
-                '0x000000000000000000000000686D9058bdD043167FAd1CbCe5F0e04007D9A76B',
-                '0x000000000000000000000000219230d2890F50759305D88695c488669240f964'
-            ],
+                [null, null, null, null],
+                [null, "0x000000000000000000000000e61383556642af1bd7c5756b13f19a63dc8601df", null, null],
+                [null, null, "0x000000000000000000000000e61383556642af1bd7c5756b13f19a63dc8601df", null],
+                [null, null, null, "0x000000000000000000000000e61383556642af1bd7c5756b13f19a63dc8601df"],
         ],
     });
     console.timeEnd("Scan")
