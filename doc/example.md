@@ -19,7 +19,7 @@ const { AssistedJsonRpcProvider } = require('assisted-json-rpc-provider')
 const provider = new AssistedJsonRpcProvider(
     provider,
     {
-        url: 'https://api.bscscan.com/api',
+        url: 'https://api.etherscan.io/v2/api?chainid=42161',
         maxResults: 1000,
         rangeThreshold: 1000,
         rateLimitCount: 1,

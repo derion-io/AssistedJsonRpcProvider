@@ -16,9 +16,9 @@ describe('getLogs', () => {
                 rangeThreshold: 5000,
                 rateLimitCount: 1,
                 rateLimitDuration: 5000,
-                url: "https://api.etherscan.io/api",
+                url: "https://api.etherscan.io/v2/api?chainid=56",
                 maxResults: 1000,
-                apiKeys: [],
+                apiKeys: ['GWUGY2KGN74SY6Q6UAIPSZ4PBYI4TNHI84']
             },
             web3,
         );
@@ -56,9 +56,9 @@ describe('getLogs', () => {
                     rangeThreshold: 1000,
                     rateLimitCount: 1,
                     rateLimitDuration: 5000,
-                    url: "https://api.bscscan.com/api",
+                    url: "https://api.etherscan.io/v2/api?chainid=56",
                     maxResults: 1000,
-                    apiKeys: [],
+                    apiKeys: ['GWUGY2KGN74SY6Q6UAIPSZ4PBYI4TNHI84']
                 },
             ),
             new AssistedJsonRpcProvider(provider),

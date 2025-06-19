@@ -26,9 +26,6 @@ class AssistedJsonRpcProvider extends Provider {
         this.provider = provider;
         if (etherscanConfig != null) {
             let validConfig = standardizeStartConfiguration(etherscanConfig)
-            if (!validConfig.apiKeys?.length) {
-                validConfig.apiKeys = ['YourApiKeyToken'] // dummy key which is accepted by etherscan as no key
-            }
             this.etherscanConfig = validConfig;
             this.queues = this.etherscanConfig.apiKeys.map((apiKey) => {
                 const queue = AsyncTaskThrottle.create(fetch.bind(typeof window !== 'undefined' ? window : this), validConfig.rateLimitCount, validConfig.rateLimitDuration)

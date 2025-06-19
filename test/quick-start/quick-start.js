@@ -8,7 +8,7 @@ const run = async () => {
             rateLimitDuration: 5000,
             rangeThreshold: 5000,
             maxResults: 1000,
-            url: 'https://api.bscscan.com/api',
+            url: 'https://api.etherscan.io/v2/api?chainid=56',
             // apiKeys:[]
         }
     );
