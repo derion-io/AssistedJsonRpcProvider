@@ -4,6 +4,7 @@ const run = async () => {
     const provider = new AssistedJsonRpcProvider(
         new ethers.providers.JsonRpcProvider('https://arbitrum.meowrpc.com'),
         {
+            trace: true,
             rateLimitCount: 1,
             rateLimitDuration: 5000,
             rangeThreshold: 5000,
@@ -14,8 +15,8 @@ const run = async () => {
     );
     console.log("Scan")
     const logs = await provider.getLogs({
-        fromBlock: 261545891,
-        toBlock: 347909804,
+        fromBlock: 0,
+        toBlock: Number.MAX_SAFE_INTEGER,
         topics: [
                 [null, null, null, null],
                 [null, "0x000000000000000000000000e61383556642af1bd7c5756b13f19a63dc8601df", null, null],
