@@ -102,6 +102,34 @@ function explode(s) {
     }
     return r;
 }
+
+const trimTrailingNullItems = (items) => {
+  while (items[items.length-1] == null) {
+    items.pop();
+  }
+  return items
+}
+
+const splitOrFilter = (filter) => {
+    const filters = []
+    const maxLength = _.max(filter.topics.map(topic => topic?.length))
+    for (let i = 0; i < maxLength; ++i) {
+        const f = {
+            ...filter,
+            topics: trimTrailingNullItems([
+                filter?.topics?.[0]?.[i],
+                filter?.topics?.[1]?.[i],
+                filter?.topics?.[2]?.[i],
+                filter?.topics?.[3]?.[i],
+            ])
+        }
+        if (f.topics.some(topic => topic != null)) {
+            filters.push(f)
+        }
+    }
+    return filters
+}
+
 /**
  * Generate a valid filter list with scan api. The sum of the logs of the filters is equal to the logs of the filter
  * @param {*} filter 
@@ -129,5 +157,6 @@ module.exports = {
     explode,
     mergeTwoUniqSortedLogs,
     translateFilter,
+    splitOrFilter,
     isOrMode,
 }
