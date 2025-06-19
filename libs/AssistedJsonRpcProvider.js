@@ -14,6 +14,7 @@ const { standardizeStartConfiguration } = require('./validator');
  *  url: 'https://api.etherscan.io/api',
  *  maxResults: 1000,
  *  apiKeys: ['YourApiKeyToken'],
+ *  singleRequest: false
  * }
  */
 class AssistedJsonRpcProvider extends Provider {
@@ -223,7 +224,7 @@ class AssistedJsonRpcProvider extends Provider {
             }
             let logs = await this.search(url);
 
-            if (logs.length < this.etherscanConfig.maxResults) {
+            if (logs.length < this.etherscanConfig.maxResults || this.etherscanConfig.singleRequest) {
                 return result.concat(logs);
             }
             let maxLog = _.maxBy(logs, 'blockNumber')
