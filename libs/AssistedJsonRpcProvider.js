@@ -241,7 +241,7 @@ class AssistedJsonRpcProvider extends Provider {
     getUrlScanLog(filter) {
         let url = this.etherscanConfig.url;
         url += url.includes('?') ? '&' : '?';
-        url + 'module=logs&action=getLogs';
+        url += 'module=logs&action=getLogs';
         for (const key in filter) {
             if (Object.prototype.hasOwnProperty.call(filter, key)) {
                 const value = filter[key];
