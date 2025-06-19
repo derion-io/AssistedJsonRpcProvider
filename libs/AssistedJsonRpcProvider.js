@@ -230,7 +230,12 @@ class AssistedJsonRpcProvider extends Provider {
 
             if (maxLog == null) return result // if Logs = []
 
-            fromBlock = Number(maxLog.blockNumber);
+            const maxBlock = Number(maxLog.blockNumber);
+            if (maxBlock <= fromBlock) {
+                return result; // cant advance blocks
+            }
+
+            fromBlock = maxBlock;
 
             // Truncate forward 1 block
             logs = logs.filter((log) => Number(log.blockNumber) < fromBlock)
