@@ -251,6 +251,13 @@ class AssistedJsonRpcProvider extends Provider {
         let url = this.etherscanConfig.url;
         url += url.includes('?') ? '&' : '?';
         url += 'module=logs&action=getLogs';
+        // Request maxResults as the page size so `logs.length < maxResults` is a reliable
+        // "window drained" signal — instead of relying on the endpoint's default page size,
+        // which the walk would otherwise have to guess. maxResults must stay <= the
+        // endpoint's max offset (1000 for Etherscan v2 logs).
+        if (this.etherscanConfig.maxResults != null) {
+            url += `&page=1&offset=${this.etherscanConfig.maxResults}`;
+        }
         for (const key in filter) {
             if (Object.prototype.hasOwnProperty.call(filter, key)) {
                 const value = filter[key];
