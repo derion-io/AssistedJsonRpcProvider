@@ -10,6 +10,7 @@ function standardizeStartConfiguration(config) {
         'rateLimitDuration',
         'url',
         'maxResults',
+        'maxRetries',
         'apiKeys'
     ]
 
@@ -17,6 +18,7 @@ function standardizeStartConfiguration(config) {
     _validateRateLimitCount(config.rateLimitCount)
     _validateRateLimitDuration(config.rateLimitDuration)
     _validateMaxResult(config.maxResults)
+    _validateMaxRetries(config.maxRetries)
     _validateApiKeys(config.apiKeys)
 
     const unknownProp = Object.keys(config).find(prop => !knownProps.includes(prop))
@@ -26,6 +28,7 @@ function standardizeStartConfiguration(config) {
     const defaultConfig = {
         rangeThreshold: 4000,
         maxResults: 1000,
+        maxRetries: 10,
         rateLimitCount: 5,
         rateLimitDuration: 1000,
     }
@@ -69,6 +72,16 @@ function _validateMaxResult(value){
 
     if (!Number.isInteger(value) || value < 1) {
         throw new Error('invalid configuration "maxResults"')
+    }
+}
+
+function _validateMaxRetries(value){
+    if (value == null) {
+        return
+    }
+
+    if (!Number.isInteger(value) || value < 0) {
+        throw new Error('invalid configuration "maxRetries"')
     }
 }
 

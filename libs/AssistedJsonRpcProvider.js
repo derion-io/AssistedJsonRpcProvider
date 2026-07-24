@@ -191,26 +191,48 @@ class AssistedJsonRpcProvider extends Provider {
         return this.queues[this.index]
     }
     async search(url) {
-        try {
-            while (true) {
-                const queue = this.getQueue()
-                const urlApiKey = url + `&apikey=${queue.apiKey}`
+        const maxRetries = this.etherscanConfig.maxRetries
+        for (let attempt = 0; ; attempt++) {
+            const queue = this.getQueue() // rotates API keys across retries
+            const urlApiKey = url + `&apikey=${queue.apiKey}`
 
-                const res = await queue(urlApiKey).then((res) => res.json());
-
-                if (Array.isArray(res.result)) {
-                    // Convert hex string to number
-                    res.result.forEach((log) => {
-                        log.address = ethers.utils.getAddress(log.address)
-                        log.blockNumber = Number(log.blockNumber) || 0
-                        log.transactionIndex = Number(log.transactionIndex) || 0
-                        log.logIndex = Number(log.logIndex) || 0
-                    })
-                    return res.result;
+            let res, httpStatus
+            try {
+                const response = await queue(urlApiKey)
+                httpStatus = response.status
+                res = await response.json()
+            } catch (error) {
+                // network failure or non-JSON body (gateway / HTML error page) — transient
+                if (attempt >= maxRetries) {
+                    throw new Error(`AssistedJsonRpcProvider: scan request failed after ${maxRetries} retries: ${error.message}`)
                 }
+                continue
             }
-        } catch (error) {
-            throw error;
+
+            if (Array.isArray(res.result)) {
+                // success — incl. "No records found" which returns result: []
+                res.result.forEach((log) => {
+                    log.address = ethers.utils.getAddress(log.address)
+                    log.blockNumber = Number(log.blockNumber) || 0
+                    log.transactionIndex = Number(log.transactionIndex) || 0
+                    log.logIndex = Number(log.logIndex) || 0
+                })
+                return res.result;
+            }
+
+            // Non-array result: retry only on genuinely transient conditions, else fail loud.
+            // Match "rate limit reached" specifically — the key-missing message
+            // ("Missing/Invalid API Key, rate limit of 1/5sec applied") also contains
+            // "rate limit" but is permanent, so it must fall through to the throw.
+            const text = `${res.message ?? ''} ${typeof res.result === 'string' ? res.result : ''}`
+            const transient = httpStatus === 429 || httpStatus >= 500 || /rate limit reached/i.test(text)
+            if (!transient) {
+                throw new Error(`AssistedJsonRpcProvider: scan API error: ${res.message || 'NOTOK'} — ${res.result}`)
+            }
+            if (attempt >= maxRetries) {
+                throw new Error(`AssistedJsonRpcProvider: rate limited, gave up after ${maxRetries} retries`)
+            }
+            // else loop; the throttle paces the next attempt on the next key
         }
     }
     async scanLogs(filter) {
