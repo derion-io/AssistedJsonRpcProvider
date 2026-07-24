@@ -117,13 +117,35 @@ class AssistedJsonRpcProvider extends Provider {
     waitForTransaction(...args) {
         return this.provider.waitForTransaction(...args)
     }
+    // Resolve a block tag (number, hex/decimal string, BigNumber, 'latest'/'earliest'/…,
+    // null) to a concrete decimal block number. `fallback` is used when the tag is null:
+    // pass 0 for fromBlock, 'latest' for toBlock. Throws on anything unresolvable so a
+    // wide query can never silently coerce to NaN and slip onto the capped RPC path.
+    async _resolveBlock(tag, fallback) {
+        if (tag == null) return fallback === 'latest' ? this.getBlockNumber() : fallback
+        // reject NaN / Infinity — a non-finite number would poison the range math
+        if (typeof tag === 'number' && Number.isFinite(tag)) return tag
+        if (ethers.BigNumber.isBigNumber(tag)) return tag.toNumber()
+        if (typeof tag === 'string') {
+            if (['latest', 'pending', 'safe', 'finalized'].includes(tag)) return this.getBlockNumber()
+            if (tag === 'earliest') return 0
+            const n = Number(tag) // handles '0x…' and decimal strings
+            if (Number.isFinite(n)) return n
+        }
+        throw new Error(`AssistedJsonRpcProvider: invalid block tag ${JSON.stringify(tag)}`)
+    }
     // Override
     async getLogs(filter) {
+        if (this.etherscanConfig) {
+            const fromBlock = await this._resolveBlock(filter.fromBlock, 0)
+            const toBlock = await this._resolveBlock(filter.toBlock, 'latest')
+            if (toBlock < fromBlock) {
+                throw new Error(`AssistedJsonRpcProvider: toBlock(${toBlock}) < fromBlock(${fromBlock})`)
+            }
+            filter = { ...filter, fromBlock, toBlock }
+        }
         const scanMode = this.etherscanConfig &&
-            filter.fromBlock != null &&
-            filter.toBlock != null &&
-            filter.toBlock - filter.fromBlock >
-            this.etherscanConfig.rangeThreshold
+            filter.toBlock - filter.fromBlock > this.etherscanConfig.rangeThreshold
         const orMode = isOrMode(filter.topics)
         if (this.etherscanConfig?.trace) {
             console.log('AssistedJsonRpcProvider.getLogs', { scanMode, orMode })
